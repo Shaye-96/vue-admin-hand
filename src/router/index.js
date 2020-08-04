@@ -1,19 +1,24 @@
+/* eslint-disable prettier/prettier */
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Login from "../views/Login/Login.vue";
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
-    path: "/",
-    name: "Login",
-    component: Login
-  }
+const routes = [{
+        path: "/",
+        // eslint-disable-next-line prettier/prettier
+        redirect: "Login"
+    },
+    {
+        path: "/login",
+        name: "Login",
+        component: () =>
+            import ("../views/Login/Login.vue")
+    }
 ];
 
 const router = new VueRouter({
-  routes
+    routes
 });
 
 export default router;
