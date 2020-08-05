@@ -12,8 +12,9 @@ const routes = [{
     {
         path: "/login",
         name: "Login",
+        // chunk name 按组分块
         component: () =>
-            import ("../views/Login/Login.vue")
+            import (/* webpackChunkName: "group-Login" */ "../views/Login/Login.vue")
     }
 ];
 
