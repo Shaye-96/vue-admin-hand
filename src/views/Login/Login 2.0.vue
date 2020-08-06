@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import { reactive, ref } from "@vue/composition-api";
 import {
   stripscript,
   checkEmial,
@@ -73,12 +72,10 @@ import {
 } from "@/utils/validate.js";
 export default {
   name: "login",
-  setup(props, context) {
-    /**
-     * 验证规则（放到开头）
-     */
+  data() {
+    // eslint-disable-next-line prettier/prettier
     // 验证邮箱
-    const validateUsername = (rule, value, callback) => {
+    var validateUsername = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请输入用户名！"));
       } else if (checkEmial(value)) {
@@ -88,9 +85,9 @@ export default {
       }
     };
     // 验证密码
-    const validatePassword = (rule, value, callback) => {
-      ruleForm.password = stripscript(value);
-      value = ruleForm.password;
+    var validatePassword = (rule, value, callback) => {
+      this.ruleForm.password = stripscript(value);
+      value = this.ruleForm.password;
       if (value === "") {
         callback(new Error("请输入密码！"));
       } else if (checkPassword(value)) {
@@ -99,24 +96,24 @@ export default {
       callback();
     };
     // 验证重复密码
-    const validatePasswords = (rule, value, callback) => {
-      if (tabIndex.value === 1) {
+    var validatePasswords = (rule, value, callback) => {
+      if (this.tabIndex === 1) {
         callback();
       }
-      ruleForm.passwords = stripscript(value);
-      value = ruleForm.passwords;
+      this.ruleForm.passwords = stripscript(value);
+      value = this.ruleForm.passwords;
       if (value === "") {
         callback(new Error("请再次输入密码！"));
-      } else if (value !== ruleForm.password) {
-        ruleForm.passwords = "";
+      } else if (value !== this.ruleForm.password) {
+        this.ruleForm.passwords = "";
         callback(new Error("输入错误，请重新输入！"));
       }
       callback();
     };
     // 验证验证码
     var validateChapter = (rule, value, callback) => {
-      ruleForm.chapter = stripscript(value);
-      value = ruleForm.chapter;
+      this.ruleForm.chapter = stripscript(value);
+      value = this.ruleForm.chapter;
       const reg = /^[a-z0-9]{6}$/;
       if (value === "") {
         callback(new Error("请输入验证码！"));
@@ -125,47 +122,42 @@ export default {
       }
       callback();
     };
-
-    /**
-     * 声明数据
-     */
-    // 菜单Tab 数组
-    const mennuTab = reactive([
-      { id: 0, txt: "登录" },
-      { id: 1, txt: "注册" }
-    ]);
-    // 菜单切换标签
-    const tabIndex = ref(0);
-    // 表单绑定数据
-    const ruleForm = reactive({
-      username: "",
-      password: "",
-      passwords: "",
-      chapter: ""
-    });
-
-    // 表单验证
-    const rules = reactive({
-      username: [{ validator: validateUsername, trigger: "blur" }],
-      password: [{ validator: validatePassword, trigger: "blur" }],
-      passwords: [{ validator: validatePasswords, trigger: "blur" }],
-      chapter: [{ validator: validateChapter, trigger: "blur" }]
-    });
-
-    /**
-     * 声明函数
-     */
+    return {
+      // 菜单Tab 数组
+      mennuTab: [
+        { id: 0, txt: "登录" },
+        { id: 1, txt: "注册" }
+      ],
+      // 菜单切换标签
+      tabIndex: 0,
+      // 表单对象
+      ruleForm: {
+        username: "",
+        password: "",
+        passwords: "",
+        chapter: ""
+      },
+      // 验证规则
+      rules: {
+        username: [{ validator: validateUsername, trigger: "blur" }],
+        password: [{ validator: validatePassword, trigger: "blur" }],
+        passwords: [{ validator: validatePasswords, trigger: "blur" }],
+        chapter: [{ validator: validateChapter, trigger: "blur" }]
+      }
+    };
+  },
+  methods: {
     // 切换 nav
-    const toggleMenu = val => {
-      tabIndex.value = val;
-    };
+    toggleMenu(val) {
+      this.tabIndex = val;
+    },
     // 获取验证码
-    const getChapter = () => {
+    getChapter() {
       console.log("获取验证码");
-    };
+    },
     // 提交表单
-    const submitForm = formName => {
-      context.$refs[formName].validate(valid => {
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
         if (valid) {
           alert("submit!");
         } else {
@@ -173,19 +165,7 @@ export default {
           return false;
         }
       });
-    };
-
-    return {
-      // data
-      mennuTab,
-      tabIndex,
-      ruleForm,
-      rules,
-      // methods
-      toggleMenu,
-      getChapter,
-      submitForm
-    };
+    }
   }
 };
 </script>

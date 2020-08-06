@@ -14,8 +14,7 @@ module.exports = {
      * 该函数及可以修改配置并不返回任何东西，也可以返回一个被克隆或合并过的配置版本。
      **/
     configureWebpack: config => {
-        config.resolve = {
-            // 配置解析别名
+        config.resolve = {  // 配置解析别名
             extensions: [".js", ".json", ".vue"], // 自动添加文件名后缀
             alias: {
                 vue: "vue/dist/vue.js",
