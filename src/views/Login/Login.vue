@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { reactive, ref } from "@vue/composition-api";
+import { reactive, ref, onMounted } from "@vue/composition-api";
 import {
   stripscript,
   checkEmial,
@@ -175,6 +175,10 @@ export default {
       });
     };
 
+    /**
+     * 生命周期
+     */
+    onMounted(() => {});
     return {
       // data
       mennuTab,
