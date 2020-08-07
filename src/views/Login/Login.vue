@@ -10,22 +10,25 @@
           @click="toggleMenu(index)"
         >{{ item.txt }}</li>
       </ul>
+
       <!-- Form Start -->
       <el-form
         :model="ruleForm"
         status-icon
         :rules="rules"
         size="medium"
-        ref="ruleForm"
+        ref="loginForm"
         class="login-form"
       >
         <el-form-item prop="username">
-          <label for>邮箱</label>
-          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <label for="username">邮箱</label>
+          <el-input id="username" type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
         </el-form-item>
+
         <el-form-item prop="password">
-          <label for>密码</label>
+          <label for="password">密码</label>
           <el-input
+            id="password"
             type="password"
             v-model="ruleForm.password"
             autocomplete="off"
@@ -33,9 +36,11 @@
             maxlength="20"
           ></el-input>
         </el-form-item>
+
         <el-form-item prop="passwords" v-show="tabIndex === 1">
-          <label for>重复密码</label>
+          <label for="passwords">重复密码</label>
           <el-input
+            id="passwords"
             type="password"
             v-model="ruleForm.passwords"
             autocomplete="off"
@@ -43,19 +48,31 @@
             maxlength="20"
           ></el-input>
         </el-form-item>
+
         <el-form-item prop="chapter">
-          <label for>验证码</label>
+          <label for="“chapter">验证码</label>
           <el-row :gutter="10">
             <el-col :span="15">
-              <el-input type="text" v-model="ruleForm.chapter" autocomplete="off"></el-input>
+              <el-input id="chapter" type="text" v-model="ruleForm.chapter" autocomplete="off"></el-input>
             </el-col>
             <el-col :span="9">
-              <el-button class="block" type="success" @click="getChapter">获取验证码</el-button>
+              <el-button
+                class="block"
+                type="success"
+                :disabled="chapterBtnStatus"
+                @click="getChapter"
+              >{{!chapterBtnStatus ? '获取验证码' : '发送中'}}</el-button>
             </el-col>
           </el-row>
         </el-form-item>
+
         <el-form-item class="form-btn">
-          <el-button class="block" type="danger" @click="submitForm('ruleForm')">提交</el-button>
+          <el-button
+            class="block"
+            type="danger"
+            :disabled="loginBtnStatus"
+            @click="submitForm('ruleForm')"
+          >{{tabIndex === 1 ? "注册" : "登陆"}}</el-button>
         </el-form-item>
       </el-form>
       <!-- Form End -->
@@ -65,6 +82,7 @@
 
 <script>
 import { reactive, ref, onMounted } from "@vue/composition-api";
+import { GetChapter } from "@/api/Login/login.js";
 import {
   stripscript,
   checkEmial,
@@ -73,10 +91,11 @@ import {
 } from "@/utils/validate.js";
 export default {
   name: "login",
-  setup(props, context) {
+  setup(props, { refs, root }) {
     /**
      * 验证规则（放到开头）
      */
+
     // 验证邮箱
     const validateUsername = (rule, value, callback) => {
       if (value === "") {
@@ -87,6 +106,7 @@ export default {
         callback();
       }
     };
+
     // 验证密码
     const validatePassword = (rule, value, callback) => {
       ruleForm.password = stripscript(value);
@@ -98,9 +118,11 @@ export default {
       }
       callback();
     };
+
     // 验证重复密码
     const validatePasswords = (rule, value, callback) => {
-      if (tabIndex.value === 1) {
+      if (tabIndex.value !== 1) {
+        // 登陆页面跳过验证
         callback();
       }
       ruleForm.passwords = stripscript(value);
@@ -113,6 +135,7 @@ export default {
       }
       callback();
     };
+
     // 验证验证码
     var validateChapter = (rule, value, callback) => {
       ruleForm.chapter = stripscript(value);
@@ -129,13 +152,23 @@ export default {
     /**
      * 声明数据
      */
+
     // 菜单Tab 数组
     const mennuTab = reactive([
       { id: 0, txt: "登录" },
       { id: 1, txt: "注册" }
     ]);
+
     // 菜单切换标签
+
     const tabIndex = ref(0);
+
+    // 登陆 / 注册 按钮禁用状态
+    const loginBtnStatus = ref(true);
+
+    // 获取验证码 按钮 禁用状态
+    const chapterBtnStatus = ref(false);
+
     // 表单绑定数据
     const ruleForm = reactive({
       username: "",
@@ -155,17 +188,64 @@ export default {
     /**
      * 声明函数
      */
+
     // 切换 nav
     const toggleMenu = val => {
       tabIndex.value = val;
+      chapterBtnStatus.value = false;
+      loginBtnStatus.value = true;
+      refs["loginForm"].resetFields(); //  重置表单 refs.loginForm.reserFields() 同上
     };
+
     // 获取验证码
     const getChapter = () => {
-      console.log("获取验证码");
+      //  console.log(process.env.NODE_ENV); // 开发模式
+      //  console.log(process.env.VUE_APP_VARIABLE_NAME); //  自定义环境变量
+      if (!ruleForm.username) {
+        root.$message({
+          showClose: true,
+          message: "邮箱不可以为空！",
+          type: "error"
+        });
+        return false;
+      }
+      if (!ruleForm.password) {
+        root.$message({
+          showClose: true,
+          message: "密码不可以为空！",
+          type: "error"
+        });
+        return false;
+      }
+      
+      const data = {
+        username: ruleForm.username,
+        module: tabIndex.value == 0 ? "login" : "register"
+      };
+      // 获取验证码按钮禁用
+      chapterBtnStatus.value = !chapterBtnStatus.value;
+
+      // 请求接口
+      GetChapter(data)
+        .then(response => {
+          // 接受请求成功信息
+          console.log(response);
+          root.$message({
+            showClose: false,
+            message: response.data.message,
+            type: "success"
+          })
+          loginBtnStatus.value = !loginBtnStatus.value
+        })
+        .catch(error => {
+          // 接受请求失败信息
+          console.log(error);
+        });
     };
+
     // 提交表单
     const submitForm = formName => {
-      context.$refs[formName].validate(valid => {
+      refs[formName].validate(valid => {
         if (valid) {
           alert("submit!");
         } else {
@@ -183,6 +263,8 @@ export default {
       // data
       mennuTab,
       tabIndex,
+      loginBtnStatus,
+      chapterBtnStatus,
       ruleForm,
       rules,
       // methods

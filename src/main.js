@@ -3,12 +3,9 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import axios from "axios"
 import VueCompositionApi from '@vue/composition-api'; 
 import "./element/element.js";
 
-// 将axios 挂载到Vue 原型链上
-Vue.prototype.$ = axios
 Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
 
