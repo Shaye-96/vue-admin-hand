@@ -13,7 +13,7 @@
 
       <!-- Form Start -->
       <el-form
-        :model="ruleForm"
+        :model="loginForm"
         status-icon
         :rules="rules"
         size="medium"
@@ -22,7 +22,7 @@
       >
         <el-form-item prop="username">
           <label for="username">邮箱</label>
-          <el-input id="username" type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <el-input id="username" type="text" v-model="loginForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item prop="password">
@@ -30,7 +30,7 @@
           <el-input
             id="password"
             type="password"
-            v-model="ruleForm.password"
+            v-model="loginForm.password"
             autocomplete="off"
             minlength="6"
             maxlength="20"
@@ -42,7 +42,7 @@
           <el-input
             id="passwords"
             type="password"
-            v-model="ruleForm.passwords"
+            v-model="loginForm.passwords"
             autocomplete="off"
             minlength="6"
             maxlength="20"
@@ -53,15 +53,15 @@
           <label for="“chapter">验证码</label>
           <el-row :gutter="10">
             <el-col :span="15">
-              <el-input id="chapter" type="text" v-model="ruleForm.chapter" autocomplete="off"></el-input>
+              <el-input id="chapter" type="text" v-model="loginForm.chapter" autocomplete="off"></el-input>
             </el-col>
             <el-col :span="9">
               <el-button
                 class="block"
                 type="success"
-                :disabled="chapterBtnStatus"
+                :disabled="chapterBtnStatus.status"
                 @click="getChapter"
-              >{{!chapterBtnStatus ? '获取验证码' : '发送中'}}</el-button>
+              >{{!chapterBtnStatus.status ? chapterBtnStatus.txt : chapterBtnStatus.txt}}</el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -71,7 +71,7 @@
             class="block"
             type="danger"
             :disabled="loginBtnStatus"
-            @click="submitForm('ruleForm')"
+            @click="submitForm('loginForm')"
           >{{tabIndex === 1 ? "注册" : "登陆"}}</el-button>
         </el-form-item>
       </el-form>
@@ -82,7 +82,7 @@
 
 <script>
 import { reactive, ref, onMounted } from "@vue/composition-api";
-import { GetChapter } from "@/api/Login/login.js";
+import { GetChapter, Login, Register } from "@/api/Login/login.js";
 import {
   stripscript,
   checkEmial,
@@ -109,8 +109,8 @@ export default {
 
     // 验证密码
     const validatePassword = (rule, value, callback) => {
-      ruleForm.password = stripscript(value);
-      value = ruleForm.password;
+      loginForm.password = stripscript(value);
+      value = loginForm.password;
       if (value === "") {
         callback(new Error("请输入密码！"));
       } else if (checkPassword(value)) {
@@ -125,12 +125,12 @@ export default {
         // 登陆页面跳过验证
         callback();
       }
-      ruleForm.passwords = stripscript(value);
-      value = ruleForm.passwords;
+      loginForm.passwords = stripscript(value);
+      value = loginForm.passwords;
       if (value === "") {
         callback(new Error("请再次输入密码！"));
-      } else if (value !== ruleForm.password) {
-        ruleForm.passwords = "";
+      } else if (value !== loginForm.password) {
+        loginForm.passwords = "";
         callback(new Error("输入错误，请重新输入！"));
       }
       callback();
@@ -138,8 +138,8 @@ export default {
 
     // 验证验证码
     var validateChapter = (rule, value, callback) => {
-      ruleForm.chapter = stripscript(value);
-      value = ruleForm.chapter;
+      loginForm.chapter = stripscript(value);
+      value = loginForm.chapter;
       const reg = /^[a-z0-9]{6}$/;
       if (value === "") {
         callback(new Error("请输入验证码！"));
@@ -148,7 +148,7 @@ export default {
       }
       callback();
     };
-
+    // *************************************************************
     /**
      * 声明数据
      */
@@ -167,10 +167,13 @@ export default {
     const loginBtnStatus = ref(true);
 
     // 获取验证码 按钮 禁用状态
-    const chapterBtnStatus = ref(false);
+    const chapterBtnStatus = reactive({
+      status: false,
+      txt: "获取验证码"
+    });
 
     // 表单绑定数据
-    const ruleForm = reactive({
+    const loginForm = reactive({
       username: "",
       password: "",
       passwords: "",
@@ -185,6 +188,9 @@ export default {
       chapter: [{ validator: validateChapter, trigger: "blur" }]
     });
 
+    // 倒计时
+    const timer = ref(null);
+    // *************************************************************
     /**
      * 声明函数
      */
@@ -192,16 +198,35 @@ export default {
     // 切换 nav
     const toggleMenu = val => {
       tabIndex.value = val;
-      chapterBtnStatus.value = false;
+      chapterBtnStatus.status = false;
+      chapterBtnStatus.txt = "获取验证码";
+      clearInterval(timer.value)
       loginBtnStatus.value = true;
       refs["loginForm"].resetFields(); //  重置表单 refs.loginForm.reserFields() 同上
+    };
+    
+    // 倒计时
+    const countDown = (number = 60) => {
+      if (timer.value) {
+        clearInterval(timer.value)
+      }
+      timer.value = setInterval(() => {
+        number--
+        if (number === 0) {
+          chapterBtnStatus.status = false;
+          chapterBtnStatus.txt = "重新获取";
+          clearInterval(timer.value)
+          return false;
+        };
+        chapterBtnStatus.txt = `倒计时${number}`;
+      }, 1000);
     };
 
     // 获取验证码
     const getChapter = () => {
       //  console.log(process.env.NODE_ENV); // 开发模式
       //  console.log(process.env.VUE_APP_VARIABLE_NAME); //  自定义环境变量
-      if (!ruleForm.username) {
+      if (!loginForm.username) {
         root.$message({
           showClose: true,
           message: "邮箱不可以为空！",
@@ -209,7 +234,7 @@ export default {
         });
         return false;
       }
-      if (!ruleForm.password) {
+      if (!loginForm.password) {
         root.$message({
           showClose: true,
           message: "密码不可以为空！",
@@ -217,25 +242,26 @@ export default {
         });
         return false;
       }
-      
+      // 请求接口数据
       const data = {
-        username: ruleForm.username,
+        username: loginForm.username,
         module: tabIndex.value == 0 ? "login" : "register"
       };
       // 获取验证码按钮禁用
-      chapterBtnStatus.value = !chapterBtnStatus.value;
+      chapterBtnStatus.status = true;
+      chapterBtnStatus.txt = "发送中";
 
-      // 请求接口
+      // 请求接口--获取验证码
       GetChapter(data)
         .then(response => {
           // 接受请求成功信息
-          console.log(response);
           root.$message({
             showClose: false,
             message: response.data.message,
             type: "success"
           })
           loginBtnStatus.value = !loginBtnStatus.value
+          countDown()
         })
         .catch(error => {
           // 接受请求失败信息
@@ -246,26 +272,69 @@ export default {
     // 提交表单
     const submitForm = formName => {
       refs[formName].validate(valid => {
-        if (valid) {
-          alert("submit!");
+        if (valid) {//  通过校验
+          const data = reactive({
+            username: loginForm.username,
+            password: loginForm.password,
+            code: loginForm.chapter
+          })
+          switch (tabIndex.value == 0 ? "login" : "register") {
+            case "login":
+              Login(data)
+                .then(response => {
+                  root.$message({
+                    showClose: false,
+                    message: response.data.message,
+                    type: "success"
+                  })
+                  root.$router.push({
+                    name: "Home"
+                  })
+                })
+                .catch(error => {
+                  console.log(error);
+                })
+              break;
+            case "register":
+              Register(data)
+                .then(response => {
+                  root.$message({
+                    showClose: false,
+                    message: response.data.message,
+                    type: "success"
+                  })
+                  toggleMenu(0)
+                })
+                .catch(error => {
+                  console.log(error);
+                })
+              break;
+            default:
+              break;
+          }
         } else {
-          console.log("error submit!!");
+          root.$message({
+            showClose: false,
+            message: "表单信息不正确，请重新编辑",
+            type: "danger"
+          })
           return false;
         }
       });
     };
-
+    // *************************************************************
     /**
      * 生命周期
      */
     onMounted(() => {});
+    // *************************************************************
     return {
       // data
       mennuTab,
       tabIndex,
       loginBtnStatus,
       chapterBtnStatus,
-      ruleForm,
+      loginForm,
       rules,
       // methods
       toggleMenu,

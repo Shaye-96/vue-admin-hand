@@ -10,52 +10,69 @@
           @click="toggleMenu(index)"
         >{{ item.txt }}</li>
       </ul>
+
       <!-- Form Start -->
       <el-form
-        :model="ruleForm"
+        :model="loginForm"
         status-icon
         :rules="rules"
         size="medium"
-        ref="ruleForm"
+        ref="loginForm"
         class="login-form"
       >
         <el-form-item prop="username">
-          <label for>邮箱</label>
-          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <label for="username">邮箱</label>
+          <el-input id="username" type="text" v-model="loginForm.username" autocomplete="off"></el-input>
         </el-form-item>
+
         <el-form-item prop="password">
-          <label for>密码</label>
+          <label for="password">密码</label>
           <el-input
+            id="password"
             type="password"
-            v-model="ruleForm.password"
+            v-model="loginForm.password"
             autocomplete="off"
             minlength="6"
             maxlength="20"
           ></el-input>
         </el-form-item>
+
         <el-form-item prop="passwords" v-show="tabIndex === 1">
-          <label for>重复密码</label>
+          <label for="passwords">重复密码</label>
           <el-input
+            id="passwords"
             type="password"
-            v-model="ruleForm.passwords"
+            v-model="loginForm.passwords"
             autocomplete="off"
             minlength="6"
             maxlength="20"
           ></el-input>
         </el-form-item>
+
         <el-form-item prop="chapter">
-          <label for>验证码</label>
+          <label for="“chapter">验证码</label>
           <el-row :gutter="10">
             <el-col :span="15">
-              <el-input type="text" v-model="ruleForm.chapter" autocomplete="off"></el-input>
+              <el-input id="chapter" type="text" v-model="loginForm.chapter" autocomplete="off"></el-input>
             </el-col>
             <el-col :span="9">
-              <el-button class="block" type="success" @click="getChapter">获取验证码</el-button>
+              <el-button
+                class="block"
+                type="success"
+                :disabled="chapterBtnStatus.status"
+                @click="getChapter"
+              >{{!chapterBtnStatus.status ? chapterBtnStatus.txt : chapterBtnStatus.txt}}</el-button>
             </el-col>
           </el-row>
         </el-form-item>
+
         <el-form-item class="form-btn">
-          <el-button class="block" type="danger" @click="submitForm('ruleForm')">提交</el-button>
+          <el-button
+            class="block"
+            type="danger"
+            :disabled="loginBtnStatus"
+            @click="submitForm('loginForm')"
+          >{{tabIndex === 1 ? "注册" : "登陆"}}</el-button>
         </el-form-item>
       </el-form>
       <!-- Form End -->
@@ -64,6 +81,7 @@
 </template>
 
 <script>
+import { GetChapter, Login, Register } from "@/api/Login/login.js";
 import {
   stripscript,
   checkEmial,
@@ -86,8 +104,8 @@ export default {
     };
     // 验证密码
     var validatePassword = (rule, value, callback) => {
-      this.ruleForm.password = stripscript(value);
-      value = this.ruleForm.password;
+      this.loginForm.password = stripscript(value);
+      value = this.loginForm.password;
       if (value === "") {
         callback(new Error("请输入密码！"));
       } else if (checkPassword(value)) {
@@ -100,20 +118,20 @@ export default {
       if (this.tabIndex === 1) {
         callback();
       }
-      this.ruleForm.passwords = stripscript(value);
-      value = this.ruleForm.passwords;
+      this.loginForm.passwords = stripscript(value);
+      value = this.loginForm.passwords;
       if (value === "") {
         callback(new Error("请再次输入密码！"));
-      } else if (value !== this.ruleForm.password) {
-        this.ruleForm.passwords = "";
+      } else if (value !== this.loginForm.password) {
+        this.loginForm.passwords = "";
         callback(new Error("输入错误，请重新输入！"));
       }
       callback();
     };
     // 验证验证码
     var validateChapter = (rule, value, callback) => {
-      this.ruleForm.chapter = stripscript(value);
-      value = this.ruleForm.chapter;
+      this.loginForm.chapter = stripscript(value);
+      value = this.loginForm.chapter;
       const reg = /^[a-z0-9]{6}$/;
       if (value === "") {
         callback(new Error("请输入验证码！"));
@@ -131,7 +149,7 @@ export default {
       // 菜单切换标签
       tabIndex: 0,
       // 表单对象
-      ruleForm: {
+      loginForm: {
         username: "",
         password: "",
         passwords: "",
@@ -143,25 +161,160 @@ export default {
         password: [{ validator: validatePassword, trigger: "blur" }],
         passwords: [{ validator: validatePasswords, trigger: "blur" }],
         chapter: [{ validator: validateChapter, trigger: "blur" }]
-      }
-    };
+      },
+      
+      // 登陆 / 注册 按钮禁用状态
+      loginBtnStatus: true,
+
+      // 获取验证码 按钮 禁用状态
+      chapterBtnStatus: {
+        status: false,
+        txt: "获取验证码"
+      },
+
+      // 倒计时
+      timer: null
+    }
   },
   methods: {
+    // 更改获取验证码按钮状态
+    updateChapterBtnStatus(params) {
+      this.chapterBtnStatus.status = params.status;
+      this.chapterBtnStatus.txt = params.txt;
+    },
+
+    // 重置form 表单
+    resetLoginForm() {
+      // 登录按钮禁用
+      this.loginBtnStatus = true;
+      // 重置表单
+      this.refs.loginForm.resetFields();
+    },
+
     // 切换 nav
     toggleMenu(val) {
       this.tabIndex = val;
+      this.updateChapterBtnStatus({
+        status: false,
+        txt: "获取验证码"
+      })
+      clearInterval(this.timer)
+      this.resetLoginForm()
     },
+
+    // 倒计时
+    countDown(number = 60) {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+      this.timer = setInterval(() => {
+        number--
+        if (number === 0) {
+          clearInterval(this.timer)
+          this.updateChapterBtnStatus({
+            status: false,
+            txt: "重新获取"
+          })
+          return false
+        }
+        this.chapterBtnStatus.txt = `倒计时${number}`;
+      }, 1000);
+    },
+
     // 获取验证码
     getChapter() {
-      console.log("获取验证码");
+      if (!this.loginForm.username) {
+        this.$message({
+          showClose: true,
+          message: "邮箱不可以为空！",
+          type: "error"
+        });
+        return false;
+      }
+      if (!this.loginForm.password) {
+        this.$message({
+          showClose: true,
+          message: "密码不可以为空！",
+          type: "error"
+        });
+        return false;
+      }
+      // 请求接口数据
+      const data = {
+        username: this.loginForm.username,
+        module: this.tabIndex.value == 0 ? "login" : "register"
+      };
+      // 获取验证码按钮禁用
+      this.updateChapterBtnStatus({
+        status: true,
+        txt: "发送中"
+      })
+      // 请求接口--获取验证码
+      GetChapter(data)
+        .then(response => {
+          // 接受请求成功信息
+          this.$message({
+            showClose: false,
+            message: response.data.message,
+            type: "success"
+          })
+          this.loginBtnStatus.value = !this.loginBtnStatus.value
+          this.countDown()
+        })
+        .catch(error => {
+          // 接受请求失败信息
+          console.log(error);
+        });
     },
     // 提交表单
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+          const data = {
+            username: this.loginForm.username,
+            password: this.loginForm.password,
+            code: this.loginForm.chapter
+          }
+          switch (this.tabIndex.value == 0 ? "login" : "register") {
+            case "login":
+              Login(data)
+                .then(response => {
+                  this.$message({
+                    showClose: false,
+                    message: response.data.message,
+                    type: "success"
+                  })
+                  this.$router.push({
+                    name: "Home"
+                  })
+                })
+                .catch(error => {
+                  console.log(error);
+                })
+              break;
+            case "register":
+              Register(data)
+                .then(response => {
+                  this.$message({
+                    showClose: false,
+                    message: response.data.message,
+                    type: "success"
+                  })
+                  this.toggleMenu(0)
+                })
+                .catch(error => {
+                  console.log(error);
+                })
+              break;
+            default:
+              break;
+          }
         } else {
-          console.log("error submit!!");
+          this.$message({
+            showClose: false,
+            message: "表单信息不正确，请重新编辑",
+            type: "danger"
+          })
           return false;
         }
       });

@@ -14,7 +14,14 @@ const routes = [{
         name: "Login",
         // chunk name 按组分块
         component: () =>
-            import (/* webpackChunkName: "group-Login" */ "../views/Login/Login.vue")
+            import (/* webpackChunkName: "group-Login" */ "../views/Login/Login 2.0.vue")
+    },
+    {
+        path: "/home",
+        name: "Home",
+        // chunk name 按组分块
+        component: () =>
+            import (/* webpackChunkName: "group-Login" */ "../views/Home/home.vue")
     }
 ];
 
