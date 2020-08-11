@@ -37,7 +37,7 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item prop="passwords" v-show="tabIndex === 1">
+        <el-form-item prop="passwords" v-if="tabIndex === 1">
           <label for="passwords">重复密码</label>
           <el-input
             id="passwords"
@@ -150,8 +150,8 @@ export default {
       tabIndex: 0,
       // 表单对象
       loginForm: {
-        username: "",
-        password: "",
+        username: "1151032202@qq.com",
+        password: "yang1221",
         passwords: "",
         chapter: ""
       },
@@ -188,7 +188,7 @@ export default {
       // 登录按钮禁用
       this.loginBtnStatus = true;
       // 重置表单
-      this.refs.loginForm.resetFields();
+      this.$refs.loginForm.resetFields();
     },
 
     // 切换 nav
@@ -217,7 +217,7 @@ export default {
           })
           return false
         }
-        this.chapterBtnStatus.txt = `倒计时${number}`;
+        this.chapterBtnStatus.txt = `倒计时${number}秒`;
       }, 1000);
     },
 
@@ -258,7 +258,7 @@ export default {
             message: response.data.message,
             type: "success"
           })
-          this.loginBtnStatus.value = !this.loginBtnStatus.value
+          this.loginBtnStatus = !this.loginBtnStatus
           this.countDown()
         })
         .catch(error => {
@@ -275,7 +275,7 @@ export default {
             password: this.loginForm.password,
             code: this.loginForm.chapter
           }
-          switch (this.tabIndex.value == 0 ? "login" : "register") {
+          switch (this.tabIndex === 0 ? "login" : "register") {
             case "login":
               Login(data)
                 .then(response => {
@@ -313,7 +313,7 @@ export default {
           this.$message({
             showClose: false,
             message: "表单信息不正确，请重新编辑",
-            type: "danger"
+            type: "error"
           })
           return false;
         }
