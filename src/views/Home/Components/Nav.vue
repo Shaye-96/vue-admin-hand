@@ -1,5 +1,6 @@
 <template>
   <div id="nav-wrap">
+    <img class="image" src="@/assets/logo.png" alt="logo">
     <el-menu
       default-active="1-4-1"
       class="el-menu-vertical-demo"
@@ -15,7 +16,7 @@
         <!-- el-submenu 的index 不能重复 且是 string 类型-->
         <el-submenu v-if="!item.hidden" :index="'' + index" :key="item.id">
           <template slot="title">
-            <i class="el-icon-location"></i>
+            <svg-icon :iconClass="item.meta.icon" :className="item.meta.icon"/>
             <span slot="title">{{item.meta.name}}</span>
           </template>
           <template v-if="item.children">
@@ -36,23 +37,24 @@ export default {
   name: "navMenu",
   data() {
     return {
-      isCollapse: false
     };
   },
   computed: {
     routes() {
       return this.$router.options.routes;
+    },
+    isCollapse() {
+      return this.$store.state.isCollapse
     }
   },
   mounted() {
-    console.log(this.routes);
+    console.log(this.$store.getters.count);
+    this.$store.commit('SET_COUNT', 200)
   },
   methods: {
     handleOpen(key, keyPath) {
-      console.log(key, keyPath);
     },
     handleClose(key, keyPath) {
-      console.log(key, keyPath);
     }
   }
 };
@@ -66,6 +68,10 @@ export default {
   width: $navWidth;
   height: 100%;
   background: $main-color;
+  .image {
+    margin: 25px auto 25px;
+    width: 92px;
+  }
 }
 // 使用穿透更改被选中元素的背景色也可将其写入全局element.scss 样式中
 .el-submenu {
@@ -78,5 +84,8 @@ export default {
   &.is-active.is-opened /deep/ .el-submenu__title{
     background-color: rgba(245, 108, 108, .2) !important;
   }
+}
+svg {
+  margin-right: 10px;
 }
 </style>

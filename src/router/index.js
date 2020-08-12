@@ -29,7 +29,7 @@ const routes = [{
         name: "Home",
         meta: {
             name: "控制台",
-            icon: "iconfont icon-kongzhitai"
+            icon: "home"
         },
         // chunk name 按组分块
         component: () =>
@@ -52,7 +52,7 @@ const routes = [{
         name: "Info",
         meta: {
             name: "信息管理",
-            icon: "iconfont icon-xinxiguanli"
+            icon: "info"
         },
         component: () =>
             import (/* webpackChunkName: "group-Login" */ "../views/Home/index.vue"),
@@ -82,7 +82,7 @@ const routes = [{
         name: "User",
         meta: {
             name: "用户管理",
-            icon: "iconfont icon-yonghuguanli"
+            icon: "user"
         },
         // 一级路由定位到首页，这样子路由会找到router-view 显示，否则会跳转新页面
         component: () =>

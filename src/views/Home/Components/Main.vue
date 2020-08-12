@@ -1,6 +1,8 @@
 <template>
   <div id="main-wrap">
-    <router-view />
+    <div class="container">
+      <router-view />
+    </div>
   </div>
 </template>
 
@@ -17,7 +19,13 @@ export default {
   right: 0;
   top: 75px;
   left: $navWidth;
-  border: 30px solid $main-backgroundColor;
-  border-bottom: none;
+  padding: 30px;
+  padding-bottom: 0;
+  background-color: $main-backgroundColor;
+}
+.container {
+  background-color: #ffffff;
+  height: 100%;
+  padding: 30px;
 }
 </style>
