@@ -21,8 +21,8 @@ export default {
   },
   methods: {
     navMenuState() {
-      this.$store.commit('SET_COLLAPSE')
-      console.log(this.$store.state.isCollapse);
+      //  this.$store.dispatch('setMenuStatus',{"name": "Shaye"}) //  对象用JSON字符串的形式传值
+      this.$store.commit('config/SET_COLLAPSE')
     }
   }
 }
@@ -32,12 +32,12 @@ export default {
 #header-wrap {
   position: fixed;
   top: 0;
-  left: $navWidth;
   right: 0;
   height: 75px;
   background: #ffffff;
-  -webkit-box-shadow: 0 3px 16px 0 rgba(0, 0, 0, .1);
   line-height: 75px;
+  @include webkit(box-shadow, 0 3px 16px 0 rgba(0, 0, 0, .1));
+  @include webkit(transition, all .3s ease 0s);
 }
 .header-icon {
   padding: 0 32px;
@@ -63,6 +63,16 @@ export default {
   }
   + .header-icon {
     padding: 0 28px;
+  }
+}
+.open {
+  #header-wrap {
+    left: $navWidth;
+  }
+}
+.close {
+  #header-wrap {
+    left: $navMiniWidth;
   }
 }
 </style>

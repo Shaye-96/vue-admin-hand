@@ -2,6 +2,15 @@
 * 菜单宽度
 */
 $navWidth: 250px;
+$navMiniWidth: 64px;
 $main-color: #344a5f;
 $main-backgroundColor: #f7f7f7;
 $nav-isactive: #f56c6c;
+
+@mixin webkit($type, $value) {
+  -webkit-#{$type}: $value;
+  -moz-#{$type}: $value;
+  -o-#{$type}: $value;
+  -ms-#{$type}: $value;
+  #{$type}: $value;
+}

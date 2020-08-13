@@ -277,7 +277,7 @@ export default {
           }
           switch (this.tabIndex === 0 ? "login" : "register") {
             case "login":
-              Login(data)
+              this.$store.dispatch("login/login",data)
                 .then(response => {
                   this.$message({
                     showClose: false,

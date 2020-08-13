@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="[navStatu ? 'close' : 'open']">
     <LayoutHeader />>
     <LayoutNav />
     <LayoutMain />
@@ -14,6 +14,11 @@ export default {
   name: "layOut",
   data() {
     return {};
+  },
+  computed: {
+    navStatu() {
+      return this.$store.state.config.isCollapse
+    }
   },
   components: {
     LayoutHeader,

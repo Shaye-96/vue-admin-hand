@@ -18,14 +18,25 @@ export default {
   bottom: 0;
   right: 0;
   top: 75px;
-  left: $navWidth;
   padding: 30px;
   padding-bottom: 0;
-  background-color: $main-backgroundColor;
+  background-color: $main-backgroundColor;  
+  @include webkit(box-sizing, border-box);
+  @include webkit(transition, all .3s ease 0s);
 }
 .container {
   background-color: #ffffff;
   height: 100%;
   padding: 30px;
+}
+.open {
+  #main-wrap {
+    left: $navWidth;
+  }
+}
+.close {
+  #main-wrap {
+    left: $navMiniWidth;
+  }
 }
 </style>
