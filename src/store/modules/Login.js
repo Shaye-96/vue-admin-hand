@@ -1,11 +1,21 @@
-import { GetChapter, Login, Register } from "@/api/Login/login.js";
+import { Login } from "@/api/Login/login.js";
+import { setUserToken, setUserName, getUserName } from "@/utils/app";
+import { Form } from "element-ui";
 
 // state 存放基本数据
 const state = {
+  userName: getUserName() || '',
+  token: ''
 }
 
 // mutations 更改 store 的唯一方法，提交mutations，类似事件，事件类型 + 回调函数
 const mutations = {
+  SET_USERNAME(state, value) {
+    state.userName = value
+  },
+  SET_TOKEN(state, value) {
+    state.token = value
+  }
 }
 
 // getters 相当于计算属性
@@ -28,13 +38,15 @@ const actions = {
   /**
    * 异步：请求接口返回数据后，接着去做别的事情
    */
-  login({ state }, value) {
+  login(content, value) {
     return new Promise((resolve, reject) => {
-      Login(value)
+      Login(value)  // 调用的是api 下的登陆方法
         .then(response => {
-          console.log(response);
-          // response.data.data.token
           resolve(response)
+          setUserToken(response.data.data.token)
+          setUserName(response.data.data.username)
+          content.commit("SET_USERNAME".response.data.data.userName)
+          content.commit("SET_TOKEN".response.data.data.token)
         })
         .catch(error => {
           reject(error);

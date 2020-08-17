@@ -1,10 +1,22 @@
 
 import router from "./index";
 
-import { getToken } from "@/utils/app"
+import { getUserToken } from "@/utils/app"
 
 // 路由白名单
 const whiteRouter = ['/login'];
+
+router.beforeEach((to, from, next) => {
+  if (getUserToken()) {
+    next()
+  } else {
+    if (whiteRouter.indexOf(to.path) !== -1) {
+      next()
+    } else {
+      next('/login')
+    }
+  }
+})
 
 // 路由守卫
 /**
@@ -13,15 +25,3 @@ const whiteRouter = ['/login'];
  * next(false)：中断当前路由
  * next('/')或者 next({path:'/'})：终端当前导航，跳转到一个新的导航
  */
-router.beforeEach((to, from, next) => {
-  if (getToken()) {
-    next()
-  } else {
-    if(whiteRouter.indexOf(to.path) !== -1) {
-      next()
-    } else {
-      next('/login')
-    }
-  }
-  next()
-})

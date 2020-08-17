@@ -4,7 +4,7 @@
     <div class="pull-right">
       <div class="user-info pull-left">
         <img class="image pull-left" src="@/assets/images/header.jpg" alt="头像">
-        <p class="pull-left">管理员</p>
+        <p class="pull-left">{{userName}}</p>
       </div>      
       <div class="header-icon pull-left"><svg-icon iconClass="logout" className="logout"/></div>
     </div>
@@ -17,6 +17,12 @@ export default {
   data() {
     return {
       
+    }
+  },
+  computed: {
+    userName() {
+      console.log(this.$store.state.login.userName);
+      return this.$store.state.login.userName
     }
   },
   methods: {
@@ -54,7 +60,7 @@ export default {
   border-right: 1px solid #ededed;
   cursor: pointer;
   .image {
-    margin-top: 8%;
+    margin-top: 5%;
     width: 50px;
     border-radius: 50%;
   }

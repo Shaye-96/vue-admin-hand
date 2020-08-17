@@ -8,7 +8,7 @@ import "./element/element.js";
 
 // 路由守卫
 import "./router/Guard";
-
+// svg 图标
 import "./icons/index.js"
 
 Vue.config.productionTip = false;
