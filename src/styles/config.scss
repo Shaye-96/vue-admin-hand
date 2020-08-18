@@ -14,3 +14,15 @@ $nav-isactive: #f56c6c;
   -ms-#{$type}: $value;
   #{$type}: $value;
 }
+
+@mixin labelDom($align, $width, $lineHeight: "normal") {
+  label {
+    text-align: $align;
+    width: $width + px;
+    line-height: $lineHeight + px;
+  }
+
+  .wrap-content {
+    margin-left: $width + px;
+  }
+}

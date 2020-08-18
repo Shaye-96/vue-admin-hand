@@ -1,14 +1,26 @@
-
 import router from "./index";
-
-import { getUserToken } from "@/utils/app"
+import store from "../store/index";
+import {
+  getUserToken,
+  removeUserToken,
+  removeUserName
+} from "@/utils/app"
 
 // 路由白名单
 const whiteRouter = ['/login'];
 
 router.beforeEach((to, from, next) => {
   if (getUserToken()) {
-    next()
+    console.log(to.path);
+    if (to.path === "/login") {
+      removeUserToken();
+      removeUserName();
+      store.commit("login/SET_TOKEN", '')
+      store.commit("login/SET_USERNAME", '')
+      next()
+    } else {
+      next()
+    }
   } else {
     if (whiteRouter.indexOf(to.path) !== -1) {
       next()

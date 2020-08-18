@@ -1,6 +1,13 @@
-import { Login } from "@/api/Login/login.js";
-import { setUserToken, setUserName, getUserName } from "@/utils/app";
-import { Form } from "element-ui";
+import {
+  Login
+} from "@/api/Login/login.js";
+import {
+  setUserToken,
+  setUserName,
+  getUserName,
+  removeUserToken,
+  removeUserName
+} from "@/utils/app";
 
 // state 存放基本数据
 const state = {
@@ -10,17 +17,18 @@ const state = {
 
 // mutations 更改 store 的唯一方法，提交mutations，类似事件，事件类型 + 回调函数
 const mutations = {
+  // username 
   SET_USERNAME(state, value) {
     state.userName = value
   },
+  // token
   SET_TOKEN(state, value) {
     state.token = value
   }
 }
 
 // getters 相当于计算属性
-const getters = {
-}
+const getters = {}
 
 /**
  * 同 mutations 类似，用于修改state 中数据的值
@@ -40,7 +48,7 @@ const actions = {
    */
   login(content, value) {
     return new Promise((resolve, reject) => {
-      Login(value)  // 调用的是api 下的登陆方法
+      Login(value) // 调用的是api 下的登陆方法
         .then(response => {
           resolve(response)
           setUserToken(response.data.data.token)
@@ -51,6 +59,15 @@ const actions = {
         .catch(error => {
           reject(error);
         })
+    })
+  },
+  exit(content) {
+    return new Promise((resolve, reject) => {
+      removeUserToken();
+      removeUserName();
+      content.commit("SET_TOKEN", '')
+      content.commit("SET_USERNAME", '')
+      resolve()
     })
   }
   /**
